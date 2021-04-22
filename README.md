@@ -7,12 +7,14 @@
 
 ## CP-Koa
 
-Koa wrapper with support of cancellable middlewares. Automatically cancels async tasks when client disconnecting.
-The packages internally uses CPromise (provided by [c-promise2](https://www.npmjs.com/package/c-promise2))
-instead of the native. 
+`CPKoa` is an enhanced version of [Koa](https://www.npmjs.com/package/koa) with the support of cancellable middleware, 
+that can be automatically canceled when client disconnecting.
+The package internally uses `CPromise` (provided by [c-promise2](https://www.npmjs.com/package/c-promise2))
+instead of the native to bring the cancellation and progress capturing to the `CPKoa`. 
 
+See the [Codesandbox demo](https://codesandbox.io/s/cp-koa-readme-basic-xr2fi)
 ````javascript
-const CPKoa = require('../lib/index');
+const CPKoa = require('cp-koa');
 const {CPromise} = require('c-promise2');
 
 const app = new CPKoa();
@@ -54,7 +56,7 @@ app.use(function* (ctx, next) {
     console.log(`Progress: ${(score * 100).toFixed(1)}%`)
   }).listen(3000);
 ````
-Koa's `ctx` has a `scope` property that refers to the relative `CPromise` instance. 
+CPKoa's `ctx` has a `scope` property that refers to the relative `CPromise` instance. 
 Since every CPromise has a `signal` property that provides `AbortController` signal (controllers creating on demand),
 you can use it to cancel your async routines, when the parent scope cancels.
 This allowing you to use async middlewares and functions that do not support `CPromise` out of the box. 
@@ -69,7 +71,7 @@ app.use(async (ctx) => {
   }).listen(ctx.scope.signal);
 })
 ````
-CPKoa ctx object has a shortcut to do this easier:
+CPKoa's ctx object has a shortcut to do this easier:
 ````javascript
 app.use(async (ctx) => {
   await ctx.run(function* () { // this async routine will be cancelled when the client disconnecting
@@ -81,7 +83,7 @@ app.use(async (ctx) => {
   ctx.body= 'Done!';
 })
 ````
-CPromise provides `timeout` method, so you ably to set timeout for each middleware if you need.
+CPromise provides `timeout` method, so you able to set a timeout for each middleware separately if you need to.
 ````javascript
 const app = new CPKoa();
 
@@ -106,6 +108,33 @@ app.use(function*(ctx, next){
   console.log('stage 3');
   ctx.body = new Date().toLocaleTimeString();
 })
+````
+Since koa-router currently do not support `CPromise` features, you have to use a workaround with `ctx.run`
+inside your routes:
+````javascript
+const app = new CPKoa();
+
+const router = new Router();
+
+router.get('/', async(ctx, next)=>{
+  await ctx.run(function*(){
+    this.innerWeight(3); // total progress score
+    yield CPromise.delay(1000);
+    console.log('stage 1');
+    yield CPromise.delay(1000);
+    console.log('stage 2');
+    yield CPromise.delay(1000);
+    console.log('stage 3');
+    ctx.body= "Root page"
+  });
+})
+
+app
+  .use(router.routes())
+  .use(router.allowedMethods())
+  .on('progress', (ctx, score) => {
+    console.log(`Progress: ${(score * 100).toFixed(1)}%`)
+  }).listen(3000);
 ````
 
 ## API Reference
