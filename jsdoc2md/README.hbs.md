@@ -5,7 +5,7 @@
 ![David](https://img.shields.io/david/DigitalBrainJS/cp-koa)
 [![Stars](https://badgen.net/github/stars/DigitalBrainJS/cp-koa)](https://github.com/DigitalBrainJS/cp-koa/stargazers)
 
-## CP-Koa
+## CP-Koa :star:
 
 `CPKoa` is an enhanced version of [Koa](https://www.npmjs.com/package/koa) with the support of cancellable middleware, 
 that can be automatically canceled when client disconnecting.
@@ -40,7 +40,6 @@ Second middleware
 Progress: 100.0%
 ````
 You can still use ECMA async function as middlewares:
-
 ````javascript
 app.use(function* (ctx, next) {
   console.log(`First middleware [${ctx.url}]`);
@@ -136,6 +135,12 @@ app
     console.log(`Progress: ${(score * 100).toFixed(1)}%`)
   }).listen(3000);
 ````
+
+## Related projects
+- [c-promise2](https://www.npmjs.com/package/c-promise2) - promise with cancellation and progress capturing support
+- [use-async-effect2](https://www.npmjs.com/package/use-async-effect2) - cancel async code in functional React components
+- [cp-axios](https://www.npmjs.com/package/cp-axios) - a simple axios wrapper that provides an advanced cancellation api
+- [cp-fetch](https://www.npmjs.com/package/cp-fetch) - fetch with timeouts and request cancellation
 
 ## API Reference
 
