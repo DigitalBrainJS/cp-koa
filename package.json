@@ -1,6 +1,6 @@
 {
   "name": "cp-koa",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Koa2 middleware for defining cancellable async routines",
   "author": {
     "name": "Dmitriy Mozgovoy",
