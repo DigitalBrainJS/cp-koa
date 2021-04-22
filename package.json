@@ -22,7 +22,8 @@
     "playground": "node playground/server.js || true",
     "playground:watch": "nodemon --watch ./playground --watch lib/ --exec \"npm run playground\"",
     "docs": "jsdoc2md -t ./jsdoc2md/README.hbs.md ./lib/index.js > ./README.md",
-    "docs:namepaths": "jsdoc2md ./lib/index.js --namepaths"
+    "docs:namepaths": "jsdoc2md ./lib/index.js --namepaths",
+    "prepare": "husky install"
   },
   "husky": {
     "hooks": {
@@ -113,9 +114,8 @@
     "coveralls": "^3.1.0",
     "cp-axios": "^0.1.12",
     "cross-env": "^7.0.2",
-    "husky": "^4.3.0",
+    "husky": "^6.0.0",
     "jsdoc-to-markdown": "^6.0.1",
-    "koa-router": "^10.0.0",
     "mocha": "^8.1.3",
     "nodemon": "^2.0.4",
     "nyc": "^15.1.0"
