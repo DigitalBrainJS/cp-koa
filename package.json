@@ -1,6 +1,6 @@
 {
   "name": "cp-koa",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "enhanced Koa version with cancelable middlewares support",
   "author": {
     "name": "Dmitriy Mozgovoy",
