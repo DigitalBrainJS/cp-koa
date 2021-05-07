@@ -121,7 +121,7 @@
     "nyc": "^15.1.0"
   },
   "dependencies": {
-    "c-promise2": "^0.12.1",
+    "c-promise2": "^0.13.0",
     "http-errors": "^1.8.0",
     "koa": "^2.13.1"
   }
