@@ -42,36 +42,11 @@ module.exports = {
       return new CPromise((resolve, reject, {onDone}) => {
         const app = new CPKoa();
 
-        app.use(function* () {
-            this.signal.addEventListener('abort', ()=>{
-              resolve();
-            })
-            yield CPromise.delay(1000);
-            assert.fail('was not cancelled');
-        })
-
-        const server = app.listen(3000);
-
-        onDone(() => server.close());
-
-        (async () => {
-          const promise = cpAxios('http://localhost:3000/');
-          await CPromise.delay(100);
-          promise.cancel();
-        })();
-
-      });
-    },
-
-    'should support cancellation using ctx.scope.signal as a workaround for ECMA async functions': () => {
-      return new CPromise((resolve, reject, {onDone}) => {
-        const app = new CPKoa();
-
-        app.use(async(ctx)=> {
-          ctx.scope.signal.addEventListener('abort', ()=>{
+        app.use(function* (ctx) {
+          ctx.scope.signal.addEventListener('abort', () => {
             resolve();
           })
-          await CPromise.delay(1000);
+          yield CPromise.delay(1000);
           assert.fail('was not cancelled');
         })
 
@@ -87,6 +62,67 @@ module.exports = {
 
       });
     },
+
+    'should support cancellation using ctx.scope.onSignal as a workaround for ECMA async functions': () => {
+      return new CPromise((resolve, reject, {onDone}) => {
+        const app = new CPKoa();
+        let canceled = false;
+
+        app.use(async(ctx)=> {
+          ctx.scope.onSignal(CPromise.SIGNAL_CANCEL, ()=>{
+            canceled = true;
+            resolve();
+          })
+
+          await CPromise.delay(1000);
+          !canceled && assert.fail('was not cancelled');
+        })
+
+        const server = app.listen(3000);
+
+        onDone(() => server.close());
+
+        (async () => {
+          const promise = cpAxios('http://localhost:3000/');
+          await CPromise.delay(100);
+          promise.cancel();
+        })();
+
+      });
+    },
+
+    'should support cancellation using ctx.run decorator as a workaround for ECMA async functions': async () => {
+      const app = new CPKoa();
+      let endReached = false;
+      let pos = 0;
+
+      app.use(async (ctx) => {
+        await ctx.run(function* () {
+          yield CPromise.delay(500);
+          pos++;
+          yield CPromise.delay(500);
+          pos++;
+          yield CPromise.delay(500);
+          pos++;
+        });
+
+        await CPromise.delay(500);
+        endReached = true;
+      })
+
+      const server = app.listen(3000);
+
+      try {
+        const promise = cpAxios('http://localhost:3000/');
+        await CPromise.delay(1100);
+        promise.cancel();
+        await CPromise.delay(1000);
+        assert.equal(pos, 2);
+        assert.ok(!endReached, 'was not canceled');
+      } finally {
+        await server.close()
+      }
+    },
   },
 
   'CPKoa.cancel()': {
@@ -94,8 +130,8 @@ module.exports = {
       return new CPromise((resolve, reject, {onDone}) => {
         const app = new CPKoa();
 
-        app.use(async(ctx)=> {
-          await CPromise.delay(2000);
+        app.use(function*(ctx) {
+          yield CPromise.delay(2000);
           assert.fail('was not cancelled');
         })
 
